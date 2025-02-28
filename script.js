@@ -4,14 +4,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const resultSection = document.getElementById("result-section");
   const historyList = document.getElementById("history-list");
 
-  // Завантаження історії пошуку з localStorage
+  // Load search history from localStorage
   let searchHistory =
     JSON.parse(localStorage.getItem("pronunciationHistory")) || [];
 
-  // Відображення історії пошуку
+  // Display search history
   renderSearchHistory();
 
-  // Слухачі подій
+  // Event listeners
   searchBtn.addEventListener("click", handleSearch);
   wordInput.addEventListener("keypress", function (e) {
     if (e.key === "Enter") {
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 
-  // Функція пошуку вимови
+  // Search function
   async function handleSearch() {
     const word = wordInput.value.trim().toLowerCase();
 
@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Функція для отримання даних про слово з API
+  // Function to fetch word data from API
   async function fetchWordData(word) {
     const response = await fetch(
       `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`,
@@ -59,10 +59,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const data = await response.json();
-    return data[0]; // Повертаємо перший результат
+    return data[0]; // Return first result
   }
 
-  // Функція для відображення картки слова
+  // Function to display word card
   function renderWordCard(wordData) {
     let phonetics = wordData.phonetics.filter((p) => p.audio);
 
@@ -86,14 +86,14 @@ document.addEventListener("DOMContentLoaded", function () {
     wordHeader.appendChild(wordTitle);
     wordCard.appendChild(wordHeader);
 
-    // Додаємо транскрипцію, якщо вона є
+    // Add phonetic transcription if available
     if (wordData.phonetic) {
       const phonetic = document.createElement("div");
       phonetic.textContent = wordData.phonetic;
       wordCard.appendChild(phonetic);
     }
 
-    // Додаємо аудіо контрол для кожного доступного аудіо
+    // Add audio control for each available audio
     phonetics.forEach((phonetic, index) => {
       const audioControl = document.createElement("div");
       audioControl.className = "audio-control";
@@ -129,11 +129,66 @@ document.addEventListener("DOMContentLoaded", function () {
       wordCard.appendChild(audioControl);
     });
 
+    // Add definition section
+    if (wordData.meanings && wordData.meanings.length > 0) {
+      const definitionContainer = document.createElement("div");
+      definitionContainer.className = "definition-container";
+
+      const definitionToggle = document.createElement("div");
+      definitionToggle.className = "definition-toggle";
+      definitionToggle.textContent = "definition";
+      definitionToggle.addEventListener("click", () => {
+        definitionContent.classList.toggle("show");
+        definitionToggle.classList.toggle("active");
+      });
+
+      const definitionContent = document.createElement("div");
+      definitionContent.className = "definition-content";
+
+      // Loop through word meanings
+      wordData.meanings.forEach((meaning) => {
+        const meaningBlock = document.createElement("div");
+        meaningBlock.className = "meaning-block";
+
+        // Add part of speech
+        const partOfSpeech = document.createElement("p");
+        partOfSpeech.className = "part-of-speech";
+        partOfSpeech.textContent = meaning.partOfSpeech;
+        meaningBlock.appendChild(partOfSpeech);
+
+        // Add definitions
+        const definitionsList = document.createElement("ul");
+        definitionsList.className = "definitions-list";
+
+        meaning.definitions.slice(0, 3).forEach((def) => {
+          const definitionItem = document.createElement("li");
+          definitionItem.textContent = def.definition;
+
+          // Add example if available
+          if (def.example) {
+            const exampleText = document.createElement("p");
+            exampleText.className = "example-text";
+            exampleText.textContent = `Example: "${def.example}"`;
+            definitionItem.appendChild(exampleText);
+          }
+
+          definitionsList.appendChild(definitionItem);
+        });
+
+        meaningBlock.appendChild(definitionsList);
+        definitionContent.appendChild(meaningBlock);
+      });
+
+      definitionContainer.appendChild(definitionToggle);
+      definitionContainer.appendChild(definitionContent);
+      wordCard.appendChild(definitionContainer);
+    }
+
     resultSection.appendChild(wordCard);
     resultSection.classList.add("active");
   }
 
-  // Функція для завантаження аудіо
+  // Function to download audio
   function downloadAudio(audioUrl, fileName) {
     fetch(audioUrl)
       .then((response) => response.blob())
@@ -153,33 +208,33 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   }
 
-  // Функція для відображення помилки
+  // Function to display error
   function showError(message) {
     resultSection.innerHTML = `<p class="error-message">${message}</p>`;
     resultSection.classList.add("active");
   }
 
-  // Функція для додавання слова в історію
+  // Function to add word to history
   function addToHistory(word) {
-    // Видаляємо слово зі списку, якщо воно вже є
+    // Remove word from the list if it already exists
     searchHistory = searchHistory.filter((item) => item !== word);
 
-    // Додаємо слово на початок списку
+    // Add word to the beginning of the list
     searchHistory.unshift(word);
 
-    // Обмежуємо довжину історії до 10 елементів
+    // Limit history length to 10 items
     if (searchHistory.length > 10) {
       searchHistory.pop();
     }
 
-    // Зберігаємо в localStorage
+    // Save to localStorage
     localStorage.setItem("pronunciationHistory", JSON.stringify(searchHistory));
 
-    // Оновлюємо відображення історії
+    // Update history display
     renderSearchHistory();
   }
 
-  // Функція для відображення історії пошуку
+  // Function to display search history
   function renderSearchHistory() {
     historyList.innerHTML = "";
 

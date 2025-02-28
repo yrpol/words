@@ -153,3 +153,74 @@ h2 {
     color: #f44336;
     margin: 10px 0;
 }
+
+/* New styles for definition section */
+.definition-container {
+    margin-top: 15px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+}
+
+.definition-toggle {
+    color: #2196f3;
+    font-weight: bold;
+    cursor: pointer;
+    display: inline-block;
+    padding: 5px 0;
+    position: relative;
+}
+
+.definition-toggle::after {
+    content: "▼";
+    font-size: 10px;
+    margin-left: 5px;
+    transition: transform 0.3s;
+}
+
+.definition-toggle.active::after {
+    transform: rotate(180deg);
+}
+
+.definition-content {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.definition-content.show {
+    display: block;
+}
+
+.meaning-block {
+    margin-bottom: 15px;
+}
+
+.meaning-block:last-child {
+    margin-bottom: 0;
+}
+
+.part-of-speech {
+    font-style: italic;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.definitions-list {
+    padding-left: 20px;
+}
+
+.definitions-list li {
+    margin-bottom: 8px;
+}
+
+.example-text {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+    padding-left: 10px;
+    border-left: 2px solid #ccc;
+}
